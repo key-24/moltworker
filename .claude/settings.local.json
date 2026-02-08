@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx wrangler secret:*)",
+      "Bash(npx wrangler deploy)",
+      "Bash(tasklist /FI \"WINDOWTITLE eq npx*\")",
+      "Bash(findstr:*)",
+      "Bash(npm run build:*)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" remote -v)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" log --oneline -30)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" diff HEAD -- src/gateway/sync.ts)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" log --oneline --all -- src/gateway/sync.ts)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" log --oneline --all -- src/gateway/)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" remote:*)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" remote add upstream https://github.com/cloudflare/moltworker.git)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" fetch upstream)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" log --oneline upstream/main..HEAD)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" log --oneline HEAD..upstream/main)",
+      "Bash(git -C \"C:\\\\Users\\\\amsoc\\\\Antigravity_local\\\\Clawdbot\" diff --stat HEAD upstream/main)"
+    ]
+  }
+}

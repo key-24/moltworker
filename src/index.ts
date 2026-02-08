@@ -462,6 +462,14 @@ async function scheduled(
     return;
   }
 
+  // Verify gateway is actually ready (not still in onboard phase)
+  try {
+    await sandbox.containerFetch(new Request('http://localhost:18789/'), MOLTBOT_PORT);
+  } catch {
+    console.log('[cron] Gateway process found but not responding yet, skipping sync');
+    return;
+  }
+
   console.log('[cron] Starting backup sync to R2...');
   const result = await syncToR2(sandbox, env);
 

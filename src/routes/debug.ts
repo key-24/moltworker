@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import type { AppEnv } from '../types';
-import { findExistingMoltbotProcess } from '../gateway';
+import { findExistingMoltbotProcess, syncToR2, ensureMoltbotGateway } from '../gateway';
 
 /**
  * Debug routes for inspecting container state
@@ -398,6 +398,62 @@ debug.get('/container-config', async (c) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return c.json({ error: errorMessage }, 500);
+  }
+});
+
+// GET /debug/start-gateway - Start the gateway and return status
+debug.get('/start-gateway', async (c) => {
+  const sandbox = c.get('sandbox');
+
+  try {
+    const process = await ensureMoltbotGateway(sandbox, c.env);
+
+    // Wait a bit for the gateway to fully initialize
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const logs = await process.getLogs();
+
+    return c.json({
+      status: 'success',
+      message: 'Gateway started successfully',
+      process_id: process.id,
+      process_status: process.status,
+      stdout: logs.stdout || '',
+      stderr: logs.stderr || '',
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ status: 'error', message: errorMessage }, 500);
+  }
+});
+
+// GET /debug/sync - Manually trigger R2 backup sync (starts gateway first)
+debug.get('/sync', async (c) => {
+  const sandbox = c.get('sandbox');
+
+  try {
+    // First ensure gateway is running (this creates config and mounts R2)
+    await ensureMoltbotGateway(sandbox, c.env);
+
+    // Then run sync
+    const result = await syncToR2(sandbox, c.env);
+
+    if (result.success) {
+      return c.json({
+        status: 'success',
+        message: 'Sync completed successfully',
+        lastSync: result.lastSync,
+      });
+    } else {
+      return c.json({
+        status: 'failed',
+        error: result.error,
+        details: result.details,
+      }, 500);
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ status: 'error', message: errorMessage }, 500);
   }
 });
 
