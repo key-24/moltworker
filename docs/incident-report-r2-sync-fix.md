@@ -190,17 +190,6 @@ openclaw onboard --non-interactive
 
 ---
 
-### 関連URL
-
-| 用途 | URL |
-|------|-----|
-| Control UI（チャット画面） | https://moltbot-sandbox.keitay24.workers.dev/?token=1b1fd31981eb4e3b86f0962a41e3871731bb024e9a98455f8c317ec7f545e792 |
-| Admin UI（管理画面） | https://moltbot-sandbox.keitay24.workers.dev/_admin/ |
-| GitHub リポジトリ | https://github.com/key-24/moltworker |
-| Cloudflare Dashboard | https://dash.cloudflare.com/ |
-
----
-
 ### 関連ファイル一覧
 
 | ファイル | 役割 |
