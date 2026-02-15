@@ -241,25 +241,6 @@ if (process.env.CF_AI_GATEWAY_MODEL) {
     }
 }
 
-// Anthropic OAuth token: replace API key in existing provider config
-// This only modifies the apiKey VALUE in existing providers, never changes structure
-if (process.env.ANTHROPIC_OAUTH_TOKEN) {
-    if (config.models && config.models.providers) {
-        var patched = false;
-        var providerNames = Object.keys(config.models.providers);
-        for (var i = 0; i < providerNames.length; i++) {
-            var prov = config.models.providers[providerNames[i]];
-            if (prov && prov.apiKey) {
-                prov.apiKey = process.env.ANTHROPIC_OAUTH_TOKEN;
-                console.log('OAuth token applied to provider: ' + providerNames[i]);
-                patched = true;
-            }
-        }
-        if (!patched) {
-            console.log('No providers with apiKey found, OAuth token not applied');
-        }
-    }
-}
 
 // Telegram configuration
 // Overwrite entire channel object to drop stale keys from old R2 backups
@@ -305,6 +286,36 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 console.log('Configuration patched successfully');
 EOFPATCH
+
+# ============================================================
+# REGISTER OAUTH TOKEN (if provided)
+# Uses OpenClaw's auth-profiles system to properly register
+# the OAuth token from Claude Pro/Max subscription.
+# This must run AFTER config patch and BEFORE gateway start.
+# ============================================================
+if [ -n "$ANTHROPIC_OAUTH_TOKEN" ]; then
+    echo "Registering Anthropic OAuth token via auth profiles..."
+    # paste-token reads token from stdin
+    echo "$ANTHROPIC_OAUTH_TOKEN" | openclaw models auth paste-token --provider anthropic 2>&1 || {
+        echo "WARNING: paste-token failed, trying direct auth-profiles.json write..."
+        # Fallback: write auth-profiles.json directly
+        AGENT_DIR="$HOME/.openclaw/agents/main/agent"
+        mkdir -p "$AGENT_DIR"
+        cat > "$AGENT_DIR/auth-profiles.json" << EOFAUTH
+{
+  "anthropic:oauth": {
+    "provider": "anthropic",
+    "mode": "oauth",
+    "setupToken": "$ANTHROPIC_OAUTH_TOKEN"
+  }
+}
+EOFAUTH
+        echo "Wrote auth-profiles.json directly"
+    }
+    echo "OAuth token registration complete"
+    # Verify
+    openclaw models status 2>&1 || true
+fi
 
 # ============================================================
 # START GATEWAY
