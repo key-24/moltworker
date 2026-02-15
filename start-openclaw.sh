@@ -130,6 +130,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
             --cloudflare-ai-gateway-account-id $CF_AI_GATEWAY_ACCOUNT_ID \
             --cloudflare-ai-gateway-gateway-id $CF_AI_GATEWAY_GATEWAY_ID \
             --cloudflare-ai-gateway-api-key $CLOUDFLARE_AI_GATEWAY_API_KEY"
+    elif [ -n "$ANTHROPIC_OAUTH_TOKEN" ]; then
+        AUTH_ARGS="--auth-choice anthropic-oauth --anthropic-oauth-token $ANTHROPIC_OAUTH_TOKEN"
     elif [ -n "$ANTHROPIC_API_KEY" ]; then
         AUTH_ARGS="--auth-choice apiKey --anthropic-api-key $ANTHROPIC_API_KEY"
     elif [ -n "$OPENAI_API_KEY" ]; then

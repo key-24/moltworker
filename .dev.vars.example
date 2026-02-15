@@ -5,6 +5,10 @@
 ANTHROPIC_API_KEY=sk-ant-...
 # OPENAI_API_KEY=sk-...
 
+# Claude Pro/Max plan OAuth token (alternative to ANTHROPIC_API_KEY)
+# Generate with: claude setup-token
+# ANTHROPIC_OAUTH_TOKEN=sk-ant-oat01-...
+
 # Cloudflare AI Gateway (alternative to direct provider keys)
 # CLOUDFLARE_AI_GATEWAY_API_KEY=your-provider-api-key
 # CF_AI_GATEWAY_ACCOUNT_ID=your-account-id

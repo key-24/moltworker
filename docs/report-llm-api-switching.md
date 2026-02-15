@@ -52,23 +52,56 @@ npm run deploy
 
 ## 2. Anthropicプロプランのアカウントログインで利用できるか？
 
-### 結論：利用不可
+### 結論：利用可能（OAuthトークン経由）
 
-### 理由
+> [!IMPORTANT]
+> 2026-02-15更新: 詳細調査の結果、OpenClawはClaude Pro/MaxプランのOAuthトークン認証に対応していることが判明。以下の手順で設定可能。
 
-- このプロジェクトは **Cloudflare Workers上で動作するサーバーサイドアプリケーション** である
-- サーバーサイドからLLMを呼び出す際は **APIキー認証が必須**
-- Claude Code CLIがアカウントログインで動作するのは、CLI自体がOAuthフローを実装しており、ローカル環境で「ブラウザ認証 → トークン取得 → API呼び出し」という流れを行っているため
-- OpenClawはCloudflare Sandboxコンテナ内で動作するため、ブラウザベースのOAuthログインフローを実行する仕組みがない
+### セットアップ手順
+
+1. **Claude Code CLIをインストール**（ローカルPCで実行）
+   ```bash
+   winget install Anthropic.ClaudeCode
+   ```
+
+2. **OAuthトークンを取得**
+   ```bash
+   claude setup-token
+   # → ブラウザが開くのでProプランのアカウントでログイン
+   # → ターミナルにトークン（sk-ant-oat01-...）が表示される
+   ```
+
+3. **Wrangler secretとして設定**
+   ```bash
+   npx wrangler secret put ANTHROPIC_OAUTH_TOKEN
+   # → 取得したトークンを貼り付け
+   ```
+
+4. **再デプロイ**
+   ```bash
+   npm run deploy
+   ```
+
+5. **（任意）APIキーを削除**
+   ```bash
+   npx wrangler secret delete ANTHROPIC_API_KEY
+   ```
+
+### 仕組み
+
+- OAuthトークンの取得はローカルPCで1回だけ行う（ブラウザログイン）
+- 取得したトークンはWrangler secretとしてCloudflareに保存される
+- コンテナ起動時、`start-openclaw.sh`が`--auth-choice anthropic-oauth`でonboardを実行
+- APIキーの従量課金が不要になり、Proプラン（$20/月）の定額で利用可能
 
 ### Claude Code CLIとの比較
 
 | 項目 | Claude Code CLI | OpenClaw（本プロジェクト） |
 |------|---------------|------------------------|
 | 実行環境 | ローカルPC | Cloudflare Workers / Sandbox |
-| 認証方式 | OAuth（ブラウザログイン）or APIキー | APIキーのみ |
-| プロプラン利用 | ✅ 可能 | ❌ 不可 |
-| 課金先 | Anthropicアカウント | APIキーの従量課金 |
+| 認証方式 | OAuth（ブラウザログイン）or APIキー | OAuthトークン or APIキー |
+| プロプラン利用 | ✅ 可能 | ✅ 可能（OAuthトークン経由） |
+| 課金先 | Anthropicアカウント | Proプラン定額 or APIキー従量課金 |
 
 ---
 

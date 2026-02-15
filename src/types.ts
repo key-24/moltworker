@@ -18,6 +18,7 @@ export interface MoltbotEnv {
   // Direct provider configuration
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_BASE_URL?: string;
+  ANTHROPIC_OAUTH_TOKEN?: string; // Claude Pro/Max plan OAuth token (from: claude setup-token)
   OPENAI_API_KEY?: string;
   MOLTBOT_GATEWAY_TOKEN?: string; // Gateway token (mapped to OPENCLAW_GATEWAY_TOKEN for container)
   DEV_MODE?: string; // Set to 'true' for local dev (skips CF Access auth + openclaw device pairing)

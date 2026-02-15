@@ -12,6 +12,7 @@
  *
  * Required secrets (set via `wrangler secret put`):
  * - ANTHROPIC_API_KEY: Your Anthropic API key
+ *   OR ANTHROPIC_OAUTH_TOKEN: Claude Pro/Max plan OAuth token (from: claude setup-token)
  *
  * Optional secrets:
  * - MOLTBOT_GATEWAY_TOKEN: Token to protect gateway access
@@ -80,11 +81,12 @@ function validateRequiredEnv(env: MoltbotEnv): string[] {
   );
   const hasLegacyGateway = !!(env.AI_GATEWAY_API_KEY && env.AI_GATEWAY_BASE_URL);
   const hasAnthropicKey = !!env.ANTHROPIC_API_KEY;
+  const hasAnthropicOAuth = !!env.ANTHROPIC_OAUTH_TOKEN;
   const hasOpenAIKey = !!env.OPENAI_API_KEY;
 
-  if (!hasCloudflareGateway && !hasLegacyGateway && !hasAnthropicKey && !hasOpenAIKey) {
+  if (!hasCloudflareGateway && !hasLegacyGateway && !hasAnthropicKey && !hasAnthropicOAuth && !hasOpenAIKey) {
     missing.push(
-      'ANTHROPIC_API_KEY, OPENAI_API_KEY, or CLOUDFLARE_AI_GATEWAY_API_KEY + CF_AI_GATEWAY_ACCOUNT_ID + CF_AI_GATEWAY_GATEWAY_ID',
+      'ANTHROPIC_API_KEY, ANTHROPIC_OAUTH_TOKEN, OPENAI_API_KEY, or CLOUDFLARE_AI_GATEWAY_API_KEY + CF_AI_GATEWAY_ACCOUNT_ID + CF_AI_GATEWAY_GATEWAY_ID',
     );
   }
 
@@ -127,6 +129,7 @@ app.use('*', async (c, next) => {
   const redactedSearch = redactSensitiveParams(url);
   console.log(`[REQ] ${c.req.method} ${url.pathname}${redactedSearch}`);
   console.log(`[REQ] Has ANTHROPIC_API_KEY: ${!!c.env.ANTHROPIC_API_KEY}`);
+  console.log(`[REQ] Has ANTHROPIC_OAUTH_TOKEN: ${!!c.env.ANTHROPIC_OAUTH_TOKEN}`);
   console.log(`[REQ] DEV_MODE: ${c.env.DEV_MODE}`);
   console.log(`[REQ] DEBUG_ROUTES: ${c.env.DEBUG_ROUTES}`);
   await next();
@@ -263,8 +266,8 @@ app.all('*', async (c) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     let hint = 'Check worker logs with: wrangler tail';
-    if (!c.env.ANTHROPIC_API_KEY) {
-      hint = 'ANTHROPIC_API_KEY is not set. Run: wrangler secret put ANTHROPIC_API_KEY';
+    if (!c.env.ANTHROPIC_API_KEY && !c.env.ANTHROPIC_OAUTH_TOKEN) {
+      hint = 'ANTHROPIC_API_KEY or ANTHROPIC_OAUTH_TOKEN is not set. Run: wrangler secret put ANTHROPIC_API_KEY (or ANTHROPIC_OAUTH_TOKEN for Pro plan)';
     } else if (errorMessage.includes('heap out of memory') || errorMessage.includes('OOM')) {
       hint = 'Gateway ran out of memory. Try again or check for memory leaks.';
     }
