@@ -22,20 +22,21 @@ describe('buildEnvVars', () => {
   });
 
   // Anthropic OAuth token (Claude Pro/Max plan)
-  it('includes ANTHROPIC_OAUTH_TOKEN when set', () => {
+  it('passes ANTHROPIC_OAUTH_TOKEN as ANTHROPIC_API_KEY when no API key set', () => {
     const env = createMockEnv({ ANTHROPIC_OAUTH_TOKEN: 'sk-ant-oat01-test-token' });
     const result = buildEnvVars(env);
-    expect(result.ANTHROPIC_OAUTH_TOKEN).toBe('sk-ant-oat01-test-token');
+    expect(result.ANTHROPIC_API_KEY).toBe('sk-ant-oat01-test-token');
+    expect(result.ANTHROPIC_OAUTH_TOKEN).toBeUndefined();
   });
 
-  it('passes both ANTHROPIC_API_KEY and ANTHROPIC_OAUTH_TOKEN when both set', () => {
+  it('prefers ANTHROPIC_API_KEY over ANTHROPIC_OAUTH_TOKEN', () => {
     const env = createMockEnv({
       ANTHROPIC_API_KEY: 'sk-api-key',
       ANTHROPIC_OAUTH_TOKEN: 'sk-ant-oat01-oauth-token',
     });
     const result = buildEnvVars(env);
     expect(result.ANTHROPIC_API_KEY).toBe('sk-api-key');
-    expect(result.ANTHROPIC_OAUTH_TOKEN).toBe('sk-ant-oat01-oauth-token');
+    expect(result.ANTHROPIC_OAUTH_TOKEN).toBeUndefined();
   });
 
   // Cloudflare AI Gateway (new native provider)
