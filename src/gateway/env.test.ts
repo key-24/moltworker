@@ -26,7 +26,7 @@ describe('buildEnvVars', () => {
     const env = createMockEnv({ ANTHROPIC_OAUTH_TOKEN: 'sk-ant-oat01-test-token' });
     const result = buildEnvVars(env);
     expect(result.ANTHROPIC_API_KEY).toBe('sk-ant-oat01-test-token');
-    expect(result.ANTHROPIC_OAUTH_TOKEN).toBeUndefined();
+    expect(result.ANTHROPIC_OAUTH_TOKEN).toBe('sk-ant-oat01-test-token');
   });
 
   it('prefers ANTHROPIC_API_KEY over ANTHROPIC_OAUTH_TOKEN', () => {

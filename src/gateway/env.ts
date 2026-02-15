@@ -28,6 +28,8 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   } else if (env.ANTHROPIC_OAUTH_TOKEN) {
     // Pass OAuth token as ANTHROPIC_API_KEY so OpenClaw uses it transparently
     envVars.ANTHROPIC_API_KEY = env.ANTHROPIC_OAUTH_TOKEN;
+    // Also pass as ANTHROPIC_OAUTH_TOKEN so start-openclaw.sh config patch can detect it
+    envVars.ANTHROPIC_OAUTH_TOKEN = env.ANTHROPIC_OAUTH_TOKEN;
   }
   if (env.OPENAI_API_KEY) envVars.OPENAI_API_KEY = env.OPENAI_API_KEY;
 
