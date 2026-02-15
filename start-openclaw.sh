@@ -241,6 +241,34 @@ if (process.env.CF_AI_GATEWAY_MODEL) {
     }
 }
 
+// Anthropic OAuth token override:
+// When ANTHROPIC_OAUTH_TOKEN is set, patch the default Anthropic provider
+// to use the OAuth token instead of the API key. This handles the case where
+// an existing config (from R2 backup) has API key auth but we want to switch
+// to OAuth-based auth from Claude Pro/Max plan.
+if (process.env.ANTHROPIC_OAUTH_TOKEN) {
+    config.models = config.models || {};
+    config.models.providers = config.models.providers || {};
+
+    // Find existing anthropic provider or create default one
+    const existingProvider = config.models.providers['anthropic'] || config.models.providers['default'] || {};
+
+    config.models.providers['anthropic'] = {
+        ...existingProvider,
+        apiKey: process.env.ANTHROPIC_OAUTH_TOKEN,
+        api: existingProvider.api || 'anthropic-messages',
+    };
+
+    // If no default model is set, set one
+    if (!config.agents?.defaults?.model?.primary) {
+        config.agents = config.agents || {};
+        config.agents.defaults = config.agents.defaults || {};
+        config.agents.defaults.model = { primary: 'anthropic/claude-sonnet-4-20250514' };
+    }
+
+    console.log('Anthropic OAuth token applied to provider config');
+}
+
 // Telegram configuration
 // Overwrite entire channel object to drop stale keys from old R2 backups
 // that would fail OpenClaw's strict config validation (see #47)
