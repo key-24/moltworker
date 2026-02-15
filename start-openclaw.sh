@@ -241,6 +241,26 @@ if (process.env.CF_AI_GATEWAY_MODEL) {
     }
 }
 
+// Anthropic OAuth token: replace API key in existing provider config
+// This only modifies the apiKey VALUE in existing providers, never changes structure
+if (process.env.ANTHROPIC_OAUTH_TOKEN) {
+    if (config.models && config.models.providers) {
+        var patched = false;
+        var providerNames = Object.keys(config.models.providers);
+        for (var i = 0; i < providerNames.length; i++) {
+            var prov = config.models.providers[providerNames[i]];
+            if (prov && prov.apiKey) {
+                prov.apiKey = process.env.ANTHROPIC_OAUTH_TOKEN;
+                console.log('OAuth token applied to provider: ' + providerNames[i]);
+                patched = true;
+            }
+        }
+        if (!patched) {
+            console.log('No providers with apiKey found, OAuth token not applied');
+        }
+    }
+}
+
 // Telegram configuration
 // Overwrite entire channel object to drop stale keys from old R2 backups
 // that would fail OpenClaw's strict config validation (see #47)
